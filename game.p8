@@ -25,22 +25,22 @@ cam = {
 }
 
 function _update()
-  if btn(0) then
+  if btn(0) then -- left
     player.angle += 0.05
   end
 
-  if btn(1) then
+  if btn(1) then -- right
     player.angle -= 0.05
   end
 
-  if btn(2) then
-    player.x -= cos(player.angle)
-    player.y -= sin(player.angle)
+  if btn(2) then -- up
+    player.x += cos(-(player.angle - 0.25)) -- this should be zero
+    player.y += sin(player.angle - 0.25) -- this should be positive
   end
 
-  if btn(3) then
-    player.x += cos(player.angle)
-    player.y += sin(player.angle)
+  if btn(3) then -- down
+    player.x += cos(player.angle + 0.25) -- should be zero
+    player.y += sin(player.angle + 0.25) -- should be negative
   end
 
   camera(cam.x, cam.y)
@@ -48,7 +48,7 @@ end
 
 function _draw()
   cls()
-  print(player.angle) 
+  print(player.angle, 5, 80)
   --px, py = rotate(
    -- player.x, player.y, 64, 64, player.angle
   --)
