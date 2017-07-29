@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
+
 starfield = {}
 for i=1,1000 do
   add(starfield, {
@@ -10,12 +11,33 @@ for i=1,1000 do
   })
 end
 
+player = {
+  x = 32,
+  y = 32,
+  angle = 0.15,
+
+  line1 = {
+    x = 0,
+    y = -1,
+  },
+
+  line2 = {
+    x = 0,
+    y = 6,
+  },
+}
+
 function _init()
   _update = update_game
   _draw = draw_game
 end
 
 function update_game()
+  -- rotate left
+  if btn(0) then player.angle += 0.05 end
+
+  -- rotate right
+  if btn(1) then player.angle -= 0.05 end
 end
 
 function draw_game()
@@ -31,26 +53,38 @@ function draw_game()
       pset(s.x, s.y, 7)
     end
   end
+
+  -- draw player line
+  px, py = player.x, player.y
+  x2, y2 = rotate(px + player.line2.x, py + player.line2.y, px, py, player.angle)
+  line(px, py, x2, y2, 8)
+
+  -- draw player ball
+  circfill(px, py, 2, 8)
 end
 
---player = {
---  sprite = 1,
---
---  x = 31,
---  y = 31,
---  angle = 0.15,
---
---  rect1 = {
---    x = 0,
---    y = -1,
---  },
---
---  rect2 = {
---    x = 0,
---    y = 5,
---  },
---}
---
+-- take a 2D position (x, y), and rotate it by angle
+-- (cx, cy) represents the pivot point
+-- https://www.lexaloffle.com/bbs/?tid=29275
+function rotate(x, y, cx, cy, angle)
+  local sina = sin(angle)
+  local cosa = cos(angle)
+
+  -- local position
+  x -= cx
+  y -= cy
+
+  -- rotation matrix
+  local rotx = cosa*x - sina*y
+  local roty = sina*x + cosa*y
+
+  -- back to global position
+  rotx += cx
+  roty += cy
+
+  return rotx, roty
+end
+
 --cam = {
 --  x = 0,
 --  y = 0,
@@ -78,14 +112,6 @@ end
 --end
 --
 --function update_game()
---  -- rotate
---  if btn(0) then -- left
---    player.angle += 0.05
---  end
---  if btn(1) then -- right
---    player.angle -= 0.05
---  end
---
 --  -- move player and camera
 --  if btn(2) then -- up
 --    local c = cos(-(player.angle - 0.25)) -- this should be zero
@@ -128,63 +154,12 @@ end
 --
 --function draw_game()
 --  cls()
---  --print(player.angle, 5, 80)
---  --px, py = rotate(
---   -- player.x, player.y, 64, 64, player.angle
---  --)
---  px, py = player.x, player.y
---
---
---  x1, y1 = rotate(
---    player.x + player.rect1.x,
---    player.y + player.rect1.y,
---    player.x,
---    player.y,
---    player.angle
---  )
---  
---  x2, y2 = rotate(
---    player.x + player.rect2.x,
---    player.y + player.rect2.y,
---    player.x,
---    player.y,
---    player.angle
---  )
---
---  --rectfill(x1, y1, x2, y2)
---  line(x1, y1, x2, y2)
---
---  -- player ball thing
---  circfill(px, py, 2)
---
 --  -- planet
 --  circfill(planet.x, planet.y, planet.r)
 --  circfill(planet2.x, planet2.y, planet2.r)
 --
 ----  --spr(player.sprite, player.x, player.y)
 ----  print(player.angle, 5, 5, 3)
---end
---
----- take a 2D position (x, y), and rotate it by angle
----- (cx, cy) represents the pivot point
----- https://www.lexaloffle.com/bbs/?tid=29275
---function rotate(x, y, cx, cy, angle)
---  local sina = sin(angle)
---  local cosa = cos(angle)
---
---  -- local position
---  x -= cx
---  y -= cy
---
---  -- rotation matrix
---  local rotx = cosa*x - sina*y
---  local roty = sina*x + cosa*y
---
---  -- back to global position
---  rotx += cx
---  roty += cy
---
---  return rotx, roty
 --end
 --
 --function update_gameover()
