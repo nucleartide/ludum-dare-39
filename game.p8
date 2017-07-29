@@ -6,6 +6,7 @@ for i=1,1000 do
   add(starfield, {
     x = rnd(1000) - 500,
     y = rnd(1000) - 500,
+    c = flr(rnd(3))
   })
 end
 
@@ -22,7 +23,13 @@ function draw_game()
 
   -- draw stars
   for s in all(starfield) do
-    pset(s.x, s.y, 7)
+    if s.c == 0 then
+      pset(s.x, s.y, 5)
+    elseif s.c == 1 then
+      pset(s.x, s.y, 6)
+    elseif s.c == 2 then
+      pset(s.x, s.y, 7)
+    end
   end
 end
 
