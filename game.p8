@@ -15,6 +15,9 @@ player = {
   x = 32,
   y = 32,
   angle = 0.15,
+  sprite = 1,
+  spr_w = 4,
+  spr_h = 4,
 
   line1 = {
     x = 0,
@@ -34,10 +37,12 @@ end
 
 function update_game()
   -- rotate left
-  if btn(0) then player.angle += 0.05 end
+  if btn(0) then player.angle -= 10 end
 
   -- rotate right
-  if btn(1) then player.angle -= 0.05 end
+  if btn(1) then player.angle += 10 end
+
+  player.angle = player.angle % 360
 
   -- move player
 
@@ -62,8 +67,6 @@ function update_game()
 --    cam.x += c
 --    cam.y += s
 --  end
---
-
 end
 
 function draw_game()
@@ -81,15 +84,18 @@ function draw_game()
   end
 
   -- draw player line
-  px, py = player.x, player.y
-  x2, y2 = rotate(px + player.line2.x, py + player.line2.y, px, py, player.angle)
-  line(px, py, x2, y2, 8)
+  -- px, py = player.x, player.y
+  -- x2, y2 = rotate(px + player.line2.x, py + player.line2.y, px, py, player.angle)
+  -- line(px, py, x2, y2, 8)
 
   -- draw player ball
-  circfill(px, py, 2, 8)
+  -- circfill(px, py, 2, 8)
+
+  -- draw player sprite
+  spr_r(player.sprite, player.x, player.y, player.angle, player.spr_w, player.spr_h)
 end
 
--- take a 2D position (x, y), and rotate it by angle
+-- take a 2d position (x, y), and rotate it by angle
 -- (cx, cy) represents the pivot point
 -- https://www.lexaloffle.com/bbs/?tid=29275
 function rotate(x, y, cx, cy, angle)
@@ -109,6 +115,30 @@ function rotate(x, y, cx, cy, angle)
   roty += cy
 
   return rotx, roty
+end
+
+-- https://www.lexaloffle.com/bbs/?tid=3593
+function spr_r(s,x,y,a,w,h)
+  sw=(w or 1)*8 -- 32
+  sh=(h or 1)*8 -- 32
+  sx=(s%8)*8 -- 8
+  sy=flr(s/8)*8 -- 0
+  x0=flr(0.5*sw) -- 16
+  y0=flr(0.5*sh) -- 16
+  a=a/360 -- fraction
+  sa=sin(a) -- yep
+  ca=cos(a) -- yep
+  for ix=0,sw-1 do -- 0 to 31
+    for iy=0,sh-1 do -- 0 to 31
+      dx=ix-x0
+      dy=iy-y0
+      xx=flr(dx*ca-dy*sa+x0) -- rotation magic
+      yy=flr(dx*sa+dy*ca+y0) -- rotatino magic
+      if (xx>=0 and xx<sw and yy>=0 and yy<=sh) then
+        pset(x+ix,y+iy,sget(sx+xx,sy+yy))
+      end
+    end
+  end
 end
 
 --cam = {
