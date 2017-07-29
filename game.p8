@@ -14,7 +14,7 @@ end
 player = {
   x = 32,
   y = 32,
-  angle = 0.15,
+  angle = 0,
   sprite = 1,
   spr_w = 4,
   spr_h = 4,
@@ -30,6 +30,11 @@ player = {
   },
 }
 
+cam = {
+  x = 20,
+  y = 20,
+}
+
 function _init()
   _update = update_game
   _draw = draw_game
@@ -37,40 +42,40 @@ end
 
 function update_game()
   -- rotate left
-  if btn(0) then player.angle -= 10 end
-
   -- rotate right
-  if btn(1) then player.angle += 10 end
+  if btn(0) then player.angle += 0.05 end
+  if btn(1) then player.angle -= 0.05 end
 
-  player.angle = player.angle % 360
+  -- move player forward
+  if btn(2) then -- up
+    local c = cos(-(player.angle - 0.25)) -- this should be zero
+    local s = sin(player.angle - 0.25) -- this should be positive
+    --local c = cos(-(player.angle - 0.5)) -- this should be zero
+    --local s = sin(player.angle - 0.5) -- this should be positive
+    player.x += c
+    player.y += s
+  end
 
-  -- move player
+  -- move player backward
+  if btn(3) then -- down
+    local c = cos(player.angle + 0.25) -- should be zero
+    local s = sin(player.angle + 0.25) -- should be negative
+    --local c = cos(player.angle + 0.5) -- should be zero
+    --local s = sin(player.angle + 0.5) -- should be negative
+    player.x += c
+    player.y += s
+  end
 
---  -- move player and camera
---  if btn(2) then -- up
---    local c = cos(-(player.angle - 0.25)) -- this should be zero
---    local s = sin(player.angle - 0.25) -- this should be positive
---
---    player.x += c
---    player.y += s
---
---    cam.x += c
---    cam.y += s
---  end
---  if btn(3) then -- down
---    local c = cos(player.angle + 0.25) -- should be zero
---    local s = sin(player.angle + 0.25) -- should be negative
---
---    player.x += c
---    player.y += s
---
---    cam.x += c
---    cam.y += s
---  end
+  -- move camera
+  if player.x < cam.x+20     then cam.x -= 1 end
+  if player.x > cam.x+128-20 then cam.x += 1 end
+  if player.y < cam.y+20     then cam.y -= 1 end
+  if player.y > cam.y+128-20 then cam.y += 1 end
 end
 
 function draw_game()
   cls()
+  camera(cam.x, cam.y)
 
   -- draw stars
   for s in all(starfield) do
@@ -84,15 +89,15 @@ function draw_game()
   end
 
   -- draw player line
-  -- px, py = player.x, player.y
-  -- x2, y2 = rotate(px + player.line2.x, py + player.line2.y, px, py, player.angle)
-  -- line(px, py, x2, y2, 8)
+  px, py = player.x, player.y
+  x2, y2 = rotate(px + player.line2.x, py + player.line2.y, px, py, player.angle)
+  line(px, py, x2, y2, 8)
 
   -- draw player ball
-  -- circfill(px, py, 2, 8)
+  circfill(px, py, 2, 8)
 
   -- draw player sprite
-  spr_r(player.sprite, player.x, player.y, player.angle, player.spr_w, player.spr_h)
+  -- spr_r(player.sprite, player.x, player.y, player.angle, player.spr_w, player.spr_h)
 end
 
 -- take a 2d position (x, y), and rotate it by angle
@@ -125,7 +130,7 @@ function spr_r(s,x,y,a,w,h)
   sy=flr(s/8)*8 -- 0
   x0=flr(0.5*sw) -- 16
   y0=flr(0.5*sh) -- 16
-  a=a/360 -- fraction
+  --a=a/360 -- fraction
   sa=sin(a) -- yep
   ca=cos(a) -- yep
   for ix=0,sw-1 do -- 0 to 31
