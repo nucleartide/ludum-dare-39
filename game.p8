@@ -4,9 +4,9 @@ __lua__
 player = {
   sprite = 1,
 
-  x = 64,
-  y = 64,
-  angle = 0,
+  x = 31,
+  y = 31,
+  angle = 0.15,
 
   rect1 = {
     x = 0,
@@ -24,31 +24,69 @@ cam = {
   y = 0,
 }
 
-function _update()
+planet = {
+  x = 0,
+  y = 0,
+  r = 40,
+}
+
+function _init()
+  _update = update_game
+  _draw = draw_game
+end
+
+function update_game()
+  -- rotate
   if btn(0) then -- left
     player.angle += 0.05
   end
-
   if btn(1) then -- right
     player.angle -= 0.05
   end
 
+  -- move player and camera
   if btn(2) then -- up
-    player.x += cos(-(player.angle - 0.25)) -- this should be zero
-    player.y += sin(player.angle - 0.25) -- this should be positive
-  end
+    local c = cos(-(player.angle - 0.25)) -- this should be zero
+    local s = sin(player.angle - 0.25) -- this should be positive
 
+    player.x += c
+    player.y += s
+
+    cam.x += c
+    cam.y += s
+  end
   if btn(3) then -- down
-    player.x += cos(player.angle + 0.25) -- should be zero
-    player.y += sin(player.angle + 0.25) -- should be negative
+    local c = cos(player.angle + 0.25) -- should be zero
+    local s = sin(player.angle + 0.25) -- should be negative
+
+    player.x += c
+    player.y += s
+
+    cam.x += c
+    cam.y += s
   end
 
+  -- set camera
   camera(cam.x, cam.y)
+
+  -- check if inside a planet...
+  if in_circle(planet.x, planet.y, planet.r, player.x, player.y) then
+    _update = update_gameover
+    _draw = draw_gameover
+  end
 end
 
-function _draw()
+-- does a point (px, py) contained by a circle whose center is at (x, y) with
+-- radius r
+function in_circle(x, y, r, px, py)
+  local dx = px - x
+  local dy = py - y
+  return sqrt(dx*dx + dy*dy) < r
+end
+
+function draw_game()
   cls()
-  print(player.angle, 5, 80)
+  --print(player.angle, 5, 80)
   --px, py = rotate(
    -- player.x, player.y, 64, 64, player.angle
   --)
@@ -74,8 +112,11 @@ function _draw()
   --rectfill(x1, y1, x2, y2)
   line(x1, y1, x2, y2)
 
+  -- player ball thing
   circfill(px, py, 2)
-  circfill(0, 0, 40)
+
+  -- planet
+  circfill(planet.x, planet.y, planet.r)
 
 --  --spr(player.sprite, player.x, player.y)
 --  print(player.angle, 5, 5, 3)
@@ -101,6 +142,15 @@ function rotate(x, y, cx, cy, angle)
   roty += cy
 
   return rotx, roty
+end
+
+function update_gameover()
+  camera(0, 0)
+end
+
+function draw_gameover()
+  cls()
+  print("welp you're dead")
 end
 __gfx__
 00000000000880000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
