@@ -237,8 +237,8 @@ function update_game()
       -- move player forward
       --
 
-      local c = round(cos(-(player.a - 0.25)))
-      local s = round(sin(player.a - 0.25))
+      local c = -round(cos(player.a))
+      local s = round(sin(player.a))
       player.x += c
       player.y += s
     end
