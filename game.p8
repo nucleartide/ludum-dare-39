@@ -205,7 +205,7 @@ function update_game()
 
     if btn(5) then
       player.launched = true
-      player.propellant -= 1
+      propel_player()
       local c = -round(cos(player.a))
       local s = round(sin(player.a))
       player.vel_x += c
@@ -230,7 +230,7 @@ function update_game()
         local s = round(sin(player.a))
         player.vel_x += c
         player.vel_y += s
-        player.propellant -= 1
+        propel_player()
       end
 
       --
@@ -242,7 +242,7 @@ function update_game()
         local s = round(sin(player.a + 0.25))
         player.vel_x += c
         player.vel_y += s
-        player.propellant -= 1
+        propel_player()
       end
 
       --
@@ -325,6 +325,12 @@ function update_game()
       del(explosions, e)
     end
   end
+end
+
+function propel_player()
+  player.propellant -= 1
+  player.propelled = true
+  player.propelled_t = 30
 end
 
 function round(n)
