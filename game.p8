@@ -172,6 +172,7 @@ score = 0
 function _init()
   _update = update_game
   _draw = draw_game
+  cartdata("crappy_gravity_game")
 end
 
 --
@@ -385,8 +386,7 @@ function update_game()
   end
   if player.delay > 120 then
     if player.dead or player.escaped then
-      _update = update_game_over
-      _draw = draw_game_over
+      game_over()
     end
   end
 end
@@ -584,6 +584,27 @@ end
 -- game over state
 --
 
+function game_over()
+  _update = update_game_over
+  _draw = draw_game_over
+
+  -- get all the high scores
+  scores = {}
+  for i=1,5 do
+    add(scores, dget(i))
+  end
+  add(scores, score)
+  sort(scores)
+
+  -- store all the scores
+  local j = 1
+  for i=6,2,-1 do
+    local s = scores[i]
+    dset(j, s)
+    j += 1
+  end
+end
+
 function update_game_over()
 end
 
@@ -592,11 +613,32 @@ function draw_game_over()
   camera()
   print("game over", 20, 20, 7)
   print("high scores:", 20, 30, 7)
+
+  -- display scores
+  for i=1,5 do
+    local v = dget(i)
+    if v != nil and v > 0 then
+      print(i .. '.' .. v, 20, 40 + i*10, 7)
+    else
+      print(i .. '.' .. "--", 20, 40 + i*10, 7)
+    end
+  end
 end
 
 --
 -- helper functions
 --
+
+-- lol
+function sort(a)
+  for i=1,#a do
+    local j = i
+    while j > 1 and a[j-1] > a[j] do
+      a[j],a[j-1] = a[j-1],a[j]
+      j = j - 1
+    end
+  end
+end
 
 -- rotate (x,y) around (cx,cy) by angle.
 -- https://www.lexaloffle.com/bbs/?tid=29275
