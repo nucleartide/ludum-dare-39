@@ -160,10 +160,10 @@ function update_game()
   -- move camera
   --
 
-  if player.x < cam.x+cam.pad     then cam.x -= 1 end
-  if player.x > cam.x+128-cam.pad then cam.x += 1 end
-  if player.y < cam.y+cam.pad     then cam.y -= 1 end
-  if player.y > cam.y+128-cam.pad then cam.y += 1 end
+  if player.x < cam.x+cam.pad     then cam.x -= 2 end
+  if player.x > cam.x+128-cam.pad then cam.x += 2 end
+  if player.y < cam.y+cam.pad     then cam.y -= 2 end
+  if player.y > cam.y+128-cam.pad then cam.y += 2 end
 end
 
 function draw_game()
