@@ -3,14 +3,18 @@ version 8
 __lua__
 
 --
+-- map size is 1000x1000
+--
+
+--
 -- starfield
 --
 
 starfield = {}
 for i=1,1000 do
   add(starfield, {
-    x = flr(rnd(1000)) - 500, -- [-500, 499]
-    y = flr(rnd(1000)) - 500, -- [-500, 499]
+    x = flr(rnd(1001)) - 500, -- [-500, 500]
+    y = flr(rnd(1001)) - 500, -- [-500, 500]
     c = flr(rnd(3)) + 5,      -- [5, 7]
   })
 end
@@ -72,6 +76,8 @@ player = {
   sp = 1,
   sp_w = 4,
   sp_h = 4,
+  c = 8,
+  r = 2,
 
   p1 = {
     x = 0,
@@ -92,6 +98,16 @@ cam = {
   x = 20,
   y = 20,
   pad = 20,
+}
+
+--
+-- minimap
+--
+
+mmap = {
+  margin = 10,
+  w = 50,
+  border = 1,
 }
 
 --
@@ -149,7 +165,7 @@ function update_game()
 end
 
 function draw_game()
-  cls()
+  cls(1)
   camera(cam.x, cam.y)
 
   --
@@ -168,14 +184,62 @@ function draw_game()
     circfill(p.x, p.y, p.r, p.c)
   end
 
+  if btn(4) then -- z
+
+    --
+    -- draw map
+    --
+
+    rectfill(
+      cam.x + mmap.margin - mmap.border,
+      cam.y + 128 - mmap.margin - mmap.w - mmap.border,
+      cam.x + mmap.margin + mmap.w + mmap.border,
+      cam.y + 128 - mmap.margin + mmap.border,
+      7 -- white
+    )
+
+    rectfill(
+      cam.x + mmap.margin,
+      cam.y + 128 - mmap.margin - mmap.w,
+      cam.x + mmap.margin + mmap.w,
+      cam.y + 128 - mmap.margin,
+      1 -- dark blue
+    )
+
+    --
+    -- draw stuff in map
+    --
+
+    local scale = mmap.w / 2000
+    for p in all(planets) do
+      circfill(
+        cam.x + mmap.margin + mmap.w/2       + p.x * scale,
+        cam.y + 128 - mmap.margin - mmap.w/2 + p.y * scale,
+        p.r * scale,
+        p.c
+      )
+    end
+
+    --
+    -- draw player in map
+    --
+
+    circfill(
+      cam.x + mmap.margin + mmap.w/2       + player.x * scale,
+      cam.y + 128 - mmap.margin - mmap.w/2 + player.y * scale,
+      1,
+      player.c
+    )
+  end
+
   --
   -- draw player
   --
 
   local p = player
   local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
-  line(p.x, p.y, x, y, 8)
-  circfill(player.x, player.y, 2, 8)
+  line(p.x, p.y, x, y, p.c)
+  circfill(p.x, p.y, p.r, p.c)
 end
 
 --
