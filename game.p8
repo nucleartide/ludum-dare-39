@@ -88,10 +88,12 @@ player = {
   launched = false,
   planet = 2,
   planet_angle = 0,
-  radius_padding = 5,
+  radius_padding = 7,
 
   -- did the player win the game
   escaped = false,
+
+  dead = false,
 
   p1 = {
     x = 0,
@@ -190,7 +192,7 @@ function update_game()
       player.vel_y += s
     end
   else
-    if not player.escaped then
+    if not player.escaped and not player.dead then
 
       --
       -- rotate player
@@ -246,14 +248,27 @@ function update_game()
       if player.x > 600 or player.y > 600 then
         player.escaped = true
       end
+
+      --
+      -- check if the player hit a planet
+      --
+
+      for p in all(planets) do
+        if in_circle(p.x, p.y, p.r, player.x, player.y) then
+          player.dead = true
+        end
+      end
     else
 
-      --
-      -- move player forward
-      --
+      if player.escaped then
+        --
+        -- move player forward
+        --
 
-      player.x += player.vel_x
-      player.y += player.vel_y
+        player.x += player.vel_x
+        player.y += player.vel_y
+      end
+
     end
   end
 end
@@ -282,11 +297,13 @@ function draw_game()
   -- draw player
   --
 
-  local p = player
-  local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
-  line(p.x, p.y, x, y, p.c)
-  circfill(p.x, p.y, p.r, p.c)
-  spr_r(player.sp, player.x-16, player.y-16, player.a, player.sp_w, player.sp_h)
+  if not player.dead then
+    local p = player
+    local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
+    line(p.x, p.y, x, y, p.c)
+    circfill(p.x, p.y, p.r, p.c)
+    spr_r(player.sp, player.x-16, player.y-16, player.a, player.sp_w, player.sp_h)
+  end
 
   --
   -- draw planets
@@ -353,7 +370,16 @@ function draw_game()
     local m = flr(t * 2) % 2
     print("escape success", cam.x + 5, cam.y + 5, m + 9)
   else
-    print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
+    --print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
+    if player.dead then
+      print("player is dead", cam.x + 2, cam.y + 2, 15)
+    end
+
+    for p in all(planets) do
+      if in_circle(p.x, p.y, p.r, player.x, player.y) then
+        print(p.r .. ' true', cam.x + 2, cam.y +2 + 20, 15)
+      end
+    end
   end
 
   --
@@ -453,6 +479,21 @@ function spr_r(s,x,y,a,w,h)
   end
 end
 
+-- does a point (px, py) contained by a circle whose center is at (x, y) with
+-- radius r
+function in_circle(x, y, r, px, py)
+  local dx = px - x
+  local dy = py - y
+  if dx > 150 then return false end
+  if dy > 150 then return false end
+  local dxx = dx*dx
+  local dyy = dy*dy
+  local result = sqrt(dxx + dyy)
+  -- dx*dx might overflow, so check that sqrt
+  -- is positive by checking if result is greater than zero
+  return result < r and result > 0 and (dxx+dyy > 0)
+end
+
 --function planet_gravity(planet, player_mass, x, y)
 --  local dx = planet.x - x
 --  local dy = planet.y - y
@@ -492,13 +533,6 @@ end
 --  end
 --end
 --
----- does a point (px, py) contained by a circle whose center is at (x, y) with
----- radius r
---function in_circle(x, y, r, px, py)
---  local dx = px - x
---  local dy = py - y
---  return sqrt(dx*dx + dy*dy) < r
---end
 __gfx__
 00000000111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000
 00000000111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000
