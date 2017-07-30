@@ -130,6 +130,12 @@ mmap = {
 }
 
 --
+-- explosions
+--
+
+explosions = {}
+
+--
 -- init
 --
 
@@ -245,7 +251,7 @@ function update_game()
       -- check if the player escaped the solar system
       --
 
-      if player.x > 600 or player.y > 600 then
+      if player.x > 600 or player.y > 600 or player.x < -600 or player.y < -600 then
         player.escaped = true
       end
 
@@ -256,6 +262,7 @@ function update_game()
       for p in all(planets) do
         if in_circle(p.x, p.y, p.r, player.x, player.y) then
           player.dead = true
+          add_explosion(player.x, player.y)
         end
       end
     else
@@ -269,6 +276,17 @@ function update_game()
         player.y += player.vel_y
       end
 
+    end
+  end
+
+  --
+  -- update explosion time
+  --
+
+  for e in all(explosions) do
+    e.t += 2
+    if e.t > 60 then
+      del(explosions, e)
     end
   end
 end
@@ -370,10 +388,11 @@ function draw_game()
     local m = flr(t * 2) % 2
     print("escape success", cam.x + 5, cam.y + 5, m + 9)
   else
-    --print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
-    if player.dead then
-      print("player is dead", cam.x + 2, cam.y + 2, 15)
-    end
+    print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
+
+--    if player.dead then
+--      print("player is dead", cam.x + 2, cam.y + 2, 15)
+--    end
 
     for p in all(planets) do
       if in_circle(p.x, p.y, p.r, player.x, player.y) then
@@ -417,6 +436,14 @@ function draw_game()
       cam.y + margin + padding + height,
       8 
     )
+  end
+
+  --
+  -- draw explosions
+  --
+
+  for e in all(explosions) do
+    circ(e.x, e.y, e.t/2, 8+e.t%3)
   end
 end
 
@@ -484,14 +511,22 @@ end
 function in_circle(x, y, r, px, py)
   local dx = px - x
   local dy = py - y
-  if dx > 150 then return false end
-  if dy > 150 then return false end
+  if abs(dx) > 150 then return false end
+  if abs(dy) > 150 then return false end
   local dxx = dx*dx
   local dyy = dy*dy
   local result = sqrt(dxx + dyy)
   -- dx*dx might overflow, so check that sqrt
   -- is positive by checking if result is greater than zero
   return result < r and result > 0 and (dxx+dyy > 0)
+end
+
+function add_explosion(x, y)
+  add(explosions, {
+    x = x,
+    y = y,
+    t = 0,
+  })
 end
 
 --function planet_gravity(planet, player_mass, x, y)
