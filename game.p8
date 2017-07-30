@@ -226,9 +226,7 @@ function update_game()
       -- check if the player escaped the solar system
       --
 
-      local x = 0.25 * player.x
-      local y = 0.25 * player.y
-      if sqrt(x*x + y*y) > 0.25 * 500 then
+      if player.x > 600 or player.y > 600 then
         player.escaped = true
       end
     else
@@ -341,7 +339,7 @@ function draw_game()
     local m = flr(t * 2) % 2
     print("escape success", cam.x + 5, cam.y + 5, m + 9)
   else
-    print("player: " .. player.a, cam.x, cam.y)
+    --print("player: " .. 0.01*player.x*0.01*player.y + 0.01*player.y*0.01*player.y, cam.x, cam.y)
   end
 end
 
