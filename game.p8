@@ -30,6 +30,8 @@ planets = {
     r = 100,
     c = 7,
     m = 100,
+    a = 0,
+    d = 0,
   },
 
   { -- earth
@@ -38,6 +40,9 @@ planets = {
     r = 40,
     c = 12,
     m = 40,
+    a = rnd(1),
+    d = 200,
+    s = 0.0001,
   },
 
   { -- mars
@@ -46,6 +51,9 @@ planets = {
     r = 30,
     c = 2,
     m = 30,
+    a = rnd(1),
+    d = 300,
+    s = 0.0002,
   },
 
   { -- uranus
@@ -54,6 +62,9 @@ planets = {
     r = 50,
     c = 6,
     m = 60,
+    a = rnd(1),
+    d = 500,
+    s = 0.0004,
   },
 
   { -- pluto
@@ -62,6 +73,9 @@ planets = {
     r = 20,
     c = 15,
     m = 20,
+    a = rnd(1),
+    d = 600, -- distance from sun
+    s = 0.0007,
   },
 }
 
@@ -288,6 +302,17 @@ function update_game()
       end
 
     end
+  end
+
+  --
+  -- make planets orbit
+  --
+
+  for i=2,#planets do
+    local p = planets[i]
+    p.a += p.s
+    p.x = p.d * cos(p.a)
+    p.y = p.d * sin(p.a)
   end
 
   --
