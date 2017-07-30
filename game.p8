@@ -88,7 +88,7 @@ player = {
   radius_padding = 2,
 
   -- did the player win the game
-  escaped,
+  escaped = false,
 
   p1 = {
     x = 0,
@@ -179,55 +179,69 @@ function update_game()
       player.launched = true
     end
   else
+    if not player.escaped then
 
-    --
-    -- rotate player
-    --
+      --
+      -- rotate player
+      --
 
-    if btn(0) then player.a += 0.05 end
-    if btn(1) then player.a -= 0.05 end
+      if btn(0) then player.a += 0.05 end
+      if btn(1) then player.a -= 0.05 end
 
-    --
-    -- move player forward
-    --
+      --
+      -- move player forward
+      --
 
-    if btn(2) then -- up
+      if btn(2) then -- up
+        local c = round(cos(-(player.a - 0.25)))
+        local s = round(sin(player.a - 0.25))
+        player.x += c
+        player.y += s
+
+        -- move camera
+        if player.x < cam.x+cam.pad     then cam.x += c end
+        if player.x > cam.x+128-cam.pad then cam.x += c end
+        if player.y < cam.y+cam.pad     then cam.y += s end
+        if player.y > cam.y+128-cam.pad then cam.y += s end
+      end
+
+      --
+      -- move player backward
+      --
+
+      if btn(3) then -- down
+        local c = round(cos(player.a + 0.25))
+        local s = round(sin(player.a + 0.25))
+        player.x += c
+        player.y += s
+
+        -- move camera
+        if player.x < cam.x+cam.pad     then cam.x += c end
+        if player.x > cam.x+128-cam.pad then cam.x += c end
+        if player.y < cam.y+cam.pad     then cam.y += s end
+        if player.y > cam.y+128-cam.pad then cam.y += s end
+      end
+
+      --
+      -- check if the player escaped the solar system
+      --
+
+      local x = 0.25 * player.x
+      local y = 0.25 * player.y
+      if sqrt(x*x + y*y) > 0.25 * 500 then
+        player.escaped = true
+      end
+    else
+
+      --
+      -- move player forward
+      --
+
       local c = round(cos(-(player.a - 0.25)))
       local s = round(sin(player.a - 0.25))
       player.x += c
       player.y += s
-
-      -- move camera
-      if player.x < cam.x+cam.pad     then cam.x += c end
-      if player.x > cam.x+128-cam.pad then cam.x += c end
-      if player.y < cam.y+cam.pad     then cam.y += s end
-      if player.y > cam.y+128-cam.pad then cam.y += s end
     end
-
-    --
-    -- move player backward
-    --
-
-    if btn(3) then -- down
-      local c = round(cos(player.a + 0.25))
-      local s = round(sin(player.a + 0.25))
-      player.x += c
-      player.y += s
-
-      -- move camera
-      if player.x < cam.x+cam.pad     then cam.x += c end
-      if player.x > cam.x+128-cam.pad then cam.x += c end
-      if player.y < cam.y+cam.pad     then cam.y += s end
-      if player.y > cam.y+128-cam.pad then cam.y += s end
-    end
-
-    --
-    -- check if the player escaped the solar system
-    --
-
-    local x
-    local y
-    -- TODO: check if magnitude is > 500
   end
 end
 
@@ -321,6 +335,13 @@ function draw_game()
   --
 
   -- print("player: " .. player.x .. player.y .. ', cam: ' .. cam.x .. cam.y, cam.x, cam.y, 9)
+  if player.escaped then
+    local t = time()
+    local m = flr(t * 2) % 2
+    print("escape success", cam.x + 5, cam.y + 5, m + 9)
+  else
+    --print("player: " .. player.x .. ' ' .. player.y, cam.x, cam.y)
+  end
 end
 
 --
