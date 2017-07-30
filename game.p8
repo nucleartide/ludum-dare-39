@@ -232,6 +232,17 @@ function update_game()
       end
 
       --
+      -- add planet gravity
+      --
+
+      -- sum up forces from each planet
+      for p in all(planets) do
+        local grav_x, grav_y = planet_gravity(p, player.x, player.y)
+        player.vel_x += grav_x
+        player.vel_y += grav_y
+      end
+
+      --
       -- move player
       --
 
@@ -529,45 +540,17 @@ function add_explosion(x, y)
   })
 end
 
---function planet_gravity(planet, player_mass, x, y)
---  local dx = planet.x - x
---  local dy = planet.y - y
---  local dx2 = dx*dx
---  local dy2 = dy*dy
---  local magnitude = sqrt(dx2 + dy2)
---  local gravity = (player_mass * planet.mass) / (dx2 + dy2)
---  return dx/magnitude * gravity, dy/magnitude * gravity
---end
---
---function update_game()
---  -- move camera
---
---  -- apply force to player velocity
---  -- sum up forces from each planet
---  local gravx, gravy = 0, 0
---  for p in all(planets) do
---    local dx, dy = planet_gravity(p, player.mass, player.x, player.y)
---    gravx += dx
---    gravy += dy
---  end
---  player.vel_x += gravx * (1/30)
---  player.vel_y += gravy * (1/30)
---
---  -- move player
---  player.x += player.vel_x * (1/30)
---  player.y += player.vel_y * (1/30)
---end
---
---  -- draw player sprite
---  -- spr_r(player.sprite, player.x, player.y, player.angle, player.spr_w, player.spr_h)
---  -- check if inside a planet...
+function planet_gravity(planet, x, y)
+  -- keep direction
+  local dx = (planet.x - x) / 100 -- stay within pico8 limits
+  local dy = (planet.y - y) / 100 -- stay within pico8 limits
 
---  if in_circle(planet.x, planet.y, planet.r, player.x, player.y) then
---    _update = update_gameover
---    _draw = draw_gameover
---  end
---end
---
+  local dx2 = dx*dx
+  local dy2 = dy*dy
+  local gravity = 1/(dx2+dy2)
+
+  return planet.m/1000 * dx * gravity, planet.m/1000 * dy * gravity
+end
 __gfx__
 00000000111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000
 00000000111111111111111111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000000000
