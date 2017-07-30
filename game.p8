@@ -154,6 +154,12 @@ mmap = {
 explosions = {}
 
 --
+-- particles
+--
+
+particles = {}
+
+--
 -- init
 --
 
@@ -374,21 +380,11 @@ function draw_game()
   --
 
   if not player.dead then
-    local p = player
-    local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
-    line(p.x, p.y, x, y, p.c)
-    circfill(p.x, p.y, p.r, p.c)
-
-    if player.propelled then
-      local t = time() % 1
-      if t<0.25 or t > 0.75 then
-        spr_r(player.sp_propel1, player.x-16, player.y-16, player.a, player.sp_w, player.sp_h)
-      else
-        spr_r(player.sp_propel2, player.x-16, player.y-16, player.a, player.sp_w, player.sp_h)
-      end
-    else
-      spr_r(player.sp, player.x-16, player.y-16, player.a, player.sp_w, player.sp_h)
-    end
+    --local p = player
+    --local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
+    --line(p.x, p.y, x, y, p.c)
+    --circfill(p.x, p.y, p.r, p.c)
+    spr_r(player.sp, player.x-16, player.y-16, player.a, player.sp_w, player.sp_h)
   end
 
   --
