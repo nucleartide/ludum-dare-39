@@ -399,11 +399,11 @@ function draw_game()
     local m = flr(t * 2) % 2
     print("escape success", cam.x + 5, cam.y + 5, m + 9)
   else
-    print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
-
---    if player.dead then
---      print("player is dead", cam.x + 2, cam.y + 2, 15)
---    end
+    if player.dead then
+      print("ship destroyed", cam.x + 2, cam.y + 2, 15)
+    else
+      print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
+    end
 
 --    for p in all(planets) do
 --      if in_circle(p.x, p.y, p.r, player.x, player.y) then
