@@ -108,8 +108,8 @@ player = {
 
   -- did the player win the game
   escaped = false,
-
   dead = false,
+  delay = 0,
 
   p1 = {
     x = 0,
@@ -375,6 +375,20 @@ function update_game()
   if player.launched and not player.dead then
     score += 1
   end
+
+  --
+  -- wait 2-3 seconds before switching state
+  --
+
+  if player.escaped or player.dead then
+    player.delay += 1
+  end
+  if player.delay > 120 then
+    if player.dead or player.escaped then
+      _update = update_game_over
+      _draw = draw_game_over
+    end
+  end
 end
 
 function propel_player()
@@ -498,11 +512,10 @@ function draw_game()
     local m = flr(t * 2) % 2
     print("escape success", cam.x + 5, cam.y + 5, m + 9)
   else
+    print("score: " .. score, cam.x+2, cam.y+2, 15)
     if player.dead then
-      print("ship destroyed", cam.x + 2, cam.y + 2, 15)
-    else
+      print("ship destroyed", cam.x + 2, cam.y + 2 + 8, 15)
       --print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
-      print("score: " .. score, cam.x+2, cam.y+2, 15)
     end
 
 --    for p in all(planets) do
@@ -575,6 +588,10 @@ function update_game_over()
 end
 
 function draw_game_over()
+  cls()
+  camera()
+  print("game over", 20, 20, 7)
+  print("high scores:", 20, 30, 7)
 end
 
 --
