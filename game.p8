@@ -71,15 +71,21 @@ planets = {
 
 player = {
   -- initially stationed on earth
-  x = 200 - 40,
-  y = -200,
-
+  x = 0,
+  y = 0,
   a = 0,
+
   sp = 1,
   sp_w = 4,
   sp_h = 4,
   c = 8,
   r = 2,
+
+  -- use these to compute launch position
+  launched = false,
+  planet = 2,
+  planet_angle = 0,
+  radius_padding = 2,
 
   p1 = {
     x = 0,
@@ -127,33 +133,62 @@ end
 
 function update_game()
 
-  --
-  -- rotate player
-  --
+  if not launched then
 
-  if btn(0) then player.a += 0.05 end
-  if btn(1) then player.a -= 0.05 end
+    --
+    -- position player on planet
+    --
 
-  --
-  -- move player forward
-  --
+    local planet = planets[player.planet]
+    local x = planet.x + cos(player.planet_angle) * (planet.r + player.radius_padding)
+    local y = planet.y + sin(player.planet_angle) * (planet.r + player.radius_padding)
+    player.x = x
+    player.y = y
 
-  if btn(2) then -- up
-    local c = cos(-(player.a - 0.25))
-    local s = sin(player.a - 0.25)
-    player.x += c
-    player.y += s
-  end
+    --
+    -- rotate player
+    --
 
-  --
-  -- move player backward
-  --
+    if btn(0) then player.planet_angle += 0.02 end
+    if btn(1) then player.planet_angle -= 0.02 end
 
-  if btn(3) then -- down
-    local c = cos(player.a + 0.25)
-    local s = sin(player.a + 0.25)
-    player.x += c
-    player.y += s
+    --
+    -- rotate player cannon thing
+    --
+
+    -- adjacent, opposite (x, y)
+    local a, o = player.x - planet.x, player.y - planet.y
+    player.a = atan2(a, o) + 0.25
+  else
+
+    --
+    -- rotate player
+    --
+
+    if btn(0) then player.a += 0.05 end
+    if btn(1) then player.a -= 0.05 end
+
+    --
+    -- move player forward
+    --
+
+    if btn(2) then -- up
+      local c = cos(-(player.a - 0.25))
+      local s = sin(player.a - 0.25)
+      player.x += c
+      player.y += s
+    end
+
+    --
+    -- move player backward
+    --
+
+    if btn(3) then -- down
+      local c = cos(player.a + 0.25)
+      local s = sin(player.a + 0.25)
+      player.x += c
+      player.y += s
+    end
   end
 
   --
