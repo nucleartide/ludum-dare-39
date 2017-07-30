@@ -394,11 +394,11 @@ function draw_game()
 --      print("player is dead", cam.x + 2, cam.y + 2, 15)
 --    end
 
-    for p in all(planets) do
-      if in_circle(p.x, p.y, p.r, player.x, player.y) then
-        print(p.r .. ' true', cam.x + 2, cam.y +2 + 20, 15)
-      end
-    end
+--    for p in all(planets) do
+--      if in_circle(p.x, p.y, p.r, player.x, player.y) then
+--        print(p.r .. ' true', cam.x + 2, cam.y +2 + 20, 15)
+--      end
+--    end
   end
 
   --
