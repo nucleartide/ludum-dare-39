@@ -70,8 +70,10 @@ planets = {
 --
 
 player = {
-  x = 32, -- TODO: start on a non-sun planet
-  y = 32,
+  -- initially stationed on earth
+  x = 200 - 40,
+  y = -200,
+
   a = 0,
   sp = 1,
   sp_w = 4,
