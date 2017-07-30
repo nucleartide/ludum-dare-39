@@ -347,12 +347,42 @@ function update_game()
   if player.propelled_t <= 0 then
     player.propelled = false
   end
+
+  --
+  -- update particles
+  --
+
+  for p in all(particles) do
+    p.x += cos(p.a)
+    p.y += sin(p.a)
+    p.t -= 1
+
+    if p.t <= 0 then
+      del(particles, p)
+    end
+  end
 end
 
 function propel_player()
   player.propellant -= 1
   player.propelled = true
   player.propelled_t = 30
+
+  -- negate angle
+  local a = -player.a
+  if a < 0 then
+    a += 1
+  end
+
+  for i=1,3 do
+    local r = rnd(1) * 0.4 - 0.2
+    add(particles, {
+      x = player.x,
+      y = player.y,
+      t = 30,
+      a = a + r,
+    })
+  end
 end
 
 function round(n)
@@ -508,6 +538,14 @@ function draw_game()
 
   for e in all(explosions) do
     circ(e.x, e.y, e.t/2, 8+e.t%3)
+  end
+
+  --
+  -- draw particles
+  --
+
+  for p in all(particles) do
+    circ(p.x, p.y, 1, 10)
   end
 end
 
