@@ -133,7 +133,7 @@ end
 
 function update_game()
 
-  if not launched then
+  if not player.launched then
 
     --
     -- position player on planet
@@ -159,6 +159,14 @@ function update_game()
     -- adjacent, opposite (x, y)
     local a, o = player.x - planet.x, player.y - planet.y
     player.a = atan2(a, o) + 0.25
+
+    --
+    -- launch
+    --
+
+    if btn(5) then
+      player.launched = true
+    end
   else
 
     --
