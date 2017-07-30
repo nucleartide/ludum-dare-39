@@ -85,7 +85,7 @@ player = {
   launched = false,
   planet = 2,
   planet_angle = 0,
-  radius_padding = 2,
+  radius_padding = 5,
 
   -- did the player win the game
   escaped = false,
@@ -169,7 +169,7 @@ function update_game()
 
     -- adjacent, opposite (x, y)
     local a, o = player.x - planet.x, player.y - planet.y
-    player.a = atan2(a, o) + 0.25
+    player.a = -(atan2(a, o) - 1)
 
     --
     -- launch
