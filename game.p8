@@ -2,42 +2,22 @@ pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
 
+--
+-- starfield
+--
+
 starfield = {}
 for i=1,1000 do
   add(starfield, {
-    x = rnd(1000) - 500,
-    y = rnd(1000) - 500,
-    c = flr(rnd(3))
+    x = flr(rnd(1000)) - 500, -- [-500, 499]
+    y = flr(rnd(1000)) - 500, -- [-500, 499]
+    c = flr(rnd(3)) + 5,      -- [5, 7]
   })
 end
 
-player = {
-  x = 32,
-  y = 32,
-  angle = 0,
-  sprite = 1,
-  spr_w = 4,
-  spr_h = 4,
-  mass = 1,
-
-  line1 = {
-    x = 0,
-    y = -1,
-  },
-
-  line2 = {
-    x = 0,
-    y = 6,
-  },
-
-  vel_x = 0,
-  vel_y = 0,
-}
-
-cam = {
-  x = 20,
-  y = 20,
-}
+--
+-- planets
+--
 
 planets = {
   { -- sun
@@ -45,147 +25,180 @@ planets = {
     y = 0,
     r = 100,
     c = 7,
-    mass = 100,
+    m = 100,
   },
 
   { -- earth
     x = 200,
-    y = 200,
+    y = -200,
     r = 40,
     c = 12,
-    mass = 40,
+    m = 40,
   },
 
   { -- mars
-    x = 300,
+    x = -300,
     y = 300,
     r = 30,
     c = 2,
-    mass = 30,
+    m = 30,
   },
 
   { -- uranus
     x = 500,
-    y = 500,
+    y = -500,
     r = 50,
     c = 6,
-    mass = 60,
+    m = 60,
   },
 
   { -- pluto
-    x = 600,
+    x = -600,
     y = 600,
     r = 20,
     c = 15,
-    mass = 20,
+    m = 20,
   },
 }
 
-function planet_gravity(planet, player_mass, x, y)
-  local dx = planet.x - x
-  local dy = planet.y - y
-  local dx2 = dx*dx
-  local dy2 = dy*dy
-  local magnitude = sqrt(dx2 + dy2)
-  local gravity = (player_mass * planet.mass) / (dx2 + dy2)
-  return dx/magnitude * gravity, dy/magnitude * gravity
-end
+--
+-- player
+--
+
+player = {
+  x = 32, -- TODO: start on a non-sun planet
+  y = 32,
+  a = 0,
+  sp = 1,
+  sp_w = 4,
+  sp_h = 4,
+
+  p1 = {
+    x = 0,
+    y = -1,
+  },
+
+  p2 = {
+    x = 0,
+    y = 6,
+  },
+}
+
+--
+-- camera
+--
+
+cam = {
+  x = 20,
+  y = 20,
+  pad = 20,
+}
+
+--
+-- init
+--
 
 function _init()
   _update = update_game
   _draw = draw_game
 end
 
+--
+-- game state
+--
+
 function update_game()
-  -- rotate left
-  -- rotate right
-  if btn(0) then player.angle += 0.05 end
-  if btn(1) then player.angle -= 0.05 end
 
+  --
+  -- rotate player
+  --
+
+  if btn(0) then player.a += 0.05 end
+  if btn(1) then player.a -= 0.05 end
+
+  --
   -- move player forward
+  --
+
   if btn(2) then -- up
-    local c = cos(-(player.angle - 0.25)) -- this should be zero
-    local s = sin(player.angle - 0.25) -- this should be positive
-    --local c = cos(-(player.angle - 0.5)) -- this should be zero
-    --local s = sin(player.angle - 0.5) -- this should be positive
-    --player.x += c
-    --player.y += s
+    local c = cos(-(player.a - 0.25))
+    local s = sin(player.a - 0.25)
+    player.x += c
+    player.y += s
   end
 
+  --
   -- move player backward
+  --
+
   if btn(3) then -- down
-    local c = cos(player.angle + 0.25) -- should be zero
-    local s = sin(player.angle + 0.25) -- should be negative
-    --local c = cos(player.angle + 0.5) -- should be zero
-    --local s = sin(player.angle + 0.5) -- should be negative
-    --player.x += c
-    --player.y += s
+    local c = cos(player.a + 0.25)
+    local s = sin(player.a + 0.25)
+    player.x += c
+    player.y += s
   end
 
+  --
   -- move camera
-  if player.x < cam.x+20     then cam.x -= 1 end
-  if player.x > cam.x+128-20 then cam.x += 1 end
-  if player.y < cam.y+20     then cam.y -= 1 end
-  if player.y > cam.y+128-20 then cam.y += 1 end
+  --
 
-  -- apply force to player velocity
-  -- sum up forces from each planet
-  local gravx, gravy = 0, 0
-  for p in all(planets) do
-    local dx, dy = planet_gravity(p, player.mass, player.x, player.y)
-    gravx += dx
-    gravy += dy
-  end
-  player.vel_x += gravx * (1/30)
-  player.vel_y += gravy * (1/30)
-
-  -- move player
-  player.x += player.vel_x * (1/30)
-  player.y += player.vel_y * (1/30)
+  if player.x < cam.x+cam.pad     then cam.x -= 1 end
+  if player.x > cam.x+128-cam.pad then cam.x += 1 end
+  if player.y < cam.y+cam.pad     then cam.y -= 1 end
+  if player.y > cam.y+128-cam.pad then cam.y += 1 end
 end
 
 function draw_game()
   cls()
   camera(cam.x, cam.y)
 
-  print("hello world", 0, 0, 7)
+  --
+  -- draw starfield
+  --
 
-  -- draw stars
   for s in all(starfield) do
-    if s.c == 0 then
-      pset(s.x, s.y, 5)
-    elseif s.c == 1 then
-      pset(s.x, s.y, 6)
-    elseif s.c == 2 then
-      pset(s.x, s.y, 7)
-    end
+    pset(s.x, s.y, s.c)
   end
 
+  --
   -- draw planets
+  --
+
   for p in all(planets) do
     circfill(p.x, p.y, p.r, p.c)
   end
 
-  -- draw player line
-  px, py = player.x, player.y
-  x2, y2 = rotate(px + player.line2.x, py + player.line2.y, px, py, player.angle)
-  line(px, py, x2, y2, 8)
+  --
+  -- draw player
+  --
 
-  -- draw player ball
-  circfill(px, py, 2, 8)
-
-  -- draw player sprite
-  -- spr_r(player.sprite, player.x, player.y, player.angle, player.spr_w, player.spr_h)
+  local p = player
+  local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
+  line(p.x, p.y, x, y, 8)
+  circfill(player.x, player.y, 2, 8)
 end
 
--- take a 2d position (x, y), and rotate it by angle
--- (cx, cy) represents the pivot point
+--
+-- game over state
+--
+
+function update_game_over()
+end
+
+function draw_game_over()
+end
+
+--
+-- helper functions
+--
+
+-- Rotate (x,y) around (cx,cy) by angle.
 -- https://www.lexaloffle.com/bbs/?tid=29275
 function rotate(x, y, cx, cy, angle)
   local sina = sin(angle)
   local cosa = cos(angle)
 
-  -- local position
+  -- local space
   x -= cx
   y -= cy
 
@@ -193,37 +206,112 @@ function rotate(x, y, cx, cy, angle)
   local rotx = cosa*x - sina*y
   local roty = sina*x + cosa*y
 
-  -- back to global position
+  -- world space
   rotx += cx
   roty += cy
 
   return rotx, roty
 end
 
--- https://www.lexaloffle.com/bbs/?tid=3593
-function spr_r(s,x,y,a,w,h)
-  sw=(w or 1)*8 -- 32
-  sh=(h or 1)*8 -- 32
-  sx=(s%8)*8 -- 8
-  sy=flr(s/8)*8 -- 0
-  x0=flr(0.5*sw) -- 16
-  y0=flr(0.5*sh) -- 16
-  --a=a/360 -- fraction
-  sa=sin(a) -- yep
-  ca=cos(a) -- yep
-  for ix=0,sw-1 do -- 0 to 31
-    for iy=0,sh-1 do -- 0 to 31
-      dx=ix-x0
-      dy=iy-y0
-      xx=flr(dx*ca-dy*sa+x0) -- rotation magic
-      yy=flr(dx*sa+dy*ca+y0) -- rotatino magic
-      if (xx>=0 and xx<sw and yy>=0 and yy<=sh) then
-        pset(x+ix,y+iy,sget(sx+xx,sy+yy))
-      end
-    end
-  end
-end
+--player = {
+--  x = 32,
+--  y = 32,
+--  angle = 0,
+--  sprite = 1,
+--  spr_w = 4,
+--  spr_h = 4,
+--  mass = 1,
+--
+--  line1 = {
+--    x = 0,
+--    y = -1,
+--  },
+--
+--  line2 = {
+--    x = 0,
+--    y = 6,
+--  },
+--
+--  vel_x = 0,
+--  vel_y = 0,
+--}
+--
+--
+--function planet_gravity(planet, player_mass, x, y)
+--  local dx = planet.x - x
+--  local dy = planet.y - y
+--  local dx2 = dx*dx
+--  local dy2 = dy*dy
+--  local magnitude = sqrt(dx2 + dy2)
+--  local gravity = (player_mass * planet.mass) / (dx2 + dy2)
+--  return dx/magnitude * gravity, dy/magnitude * gravity
+--end
+--
+--function _init()
+--  _update = update_game
+--  _draw = draw_game
+--end
+--
+--function update_game()
+--  -- move camera
+--
+--  -- apply force to player velocity
+--  -- sum up forces from each planet
+--  local gravx, gravy = 0, 0
+--  for p in all(planets) do
+--    local dx, dy = planet_gravity(p, player.mass, player.x, player.y)
+--    gravx += dx
+--    gravy += dy
+--  end
+--  player.vel_x += gravx * (1/30)
+--  player.vel_y += gravy * (1/30)
+--
+--  -- move player
+--  player.x += player.vel_x * (1/30)
+--  player.y += player.vel_y * (1/30)
+--end
+--
+--function draw_game()
+--  cls()
+--
+--  --print('wtf')
+--  camera(cam.x, cam.y)
+--
+--  -- draw planets
+--  for p in all(planets) do
+--    circfill(p.x, p.y, p.r, p.c)
+--  end
 
+--  -- draw player sprite
+--  -- spr_r(player.sprite, player.x, player.y, player.angle, player.spr_w, player.spr_h)
+--
+--  print('vel: ' .. player.vel_x .. ' ' .. player.vel_y, cam.x, cam.y, 3)
+--end
+
+---- https://www.lexaloffle.com/bbs/?tid=3593
+--function spr_r(s,x,y,a,w,h)
+--  sw=(w or 1)*8 -- 32
+--  sh=(h or 1)*8 -- 32
+--  sx=(s%8)*8 -- 8
+--  sy=flr(s/8)*8 -- 0
+--  x0=flr(0.5*sw) -- 16
+--  y0=flr(0.5*sh) -- 16
+--  --a=a/360 -- fraction
+--  sa=sin(a) -- yep
+--  ca=cos(a) -- yep
+--  for ix=0,sw-1 do -- 0 to 31
+--    for iy=0,sh-1 do -- 0 to 31
+--      dx=ix-x0
+--      dy=iy-y0
+--      xx=flr(dx*ca-dy*sa+x0) -- rotation magic
+--      yy=flr(dx*sa+dy*ca+y0) -- rotatino magic
+--      if (xx>=0 and xx<sw and yy>=0 and yy<=sh) then
+--        pset(x+ix,y+iy,sget(sx+xx,sy+yy))
+--      end
+--    end
+--  end
+--end
+--
 --cam = {
 --  x = 0,
 --  y = 0,
