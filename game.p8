@@ -35,6 +35,43 @@ cam = {
   y = 20,
 }
 
+planets = {
+  { -- sun
+    x = 0,
+    y = 0,
+    r = 100,
+    c = 7,
+  },
+
+  { -- earth
+    x = 200,
+    y = 200,
+    r = 40,
+    c = 12,
+  },
+
+  { -- mars
+    x = 300,
+    y = 300,
+    r = 30,
+    c = 2,
+  },
+
+  { -- uranus
+    x = 500,
+    y = 500,
+    r = 50,
+    c = 6,
+  },
+
+  { -- pluto
+    x = 600,
+    y = 600,
+    r = 20,
+    c = 15,
+  },
+}
+
 function _init()
   _update = update_game
   _draw = draw_game
@@ -77,6 +114,8 @@ function draw_game()
   cls()
   camera(cam.x, cam.y)
 
+  print("hello world", 0, 0, 7)
+
   -- draw stars
   for s in all(starfield) do
     if s.c == 0 then
@@ -86,6 +125,11 @@ function draw_game()
     elseif s.c == 2 then
       pset(s.x, s.y, 7)
     end
+  end
+
+  -- draw planets
+  for p in all(planets) do
+    circfill(p.x, p.y, p.r, 7)
   end
 
   -- draw player line
