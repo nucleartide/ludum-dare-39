@@ -18,6 +18,7 @@ player = {
   sprite = 1,
   spr_w = 4,
   spr_h = 4,
+  mass = 1,
 
   line1 = {
     x = 0,
@@ -28,6 +29,9 @@ player = {
     x = 0,
     y = 6,
   },
+
+  vel_x = 0,
+  vel_y = 0,
 }
 
 cam = {
@@ -41,6 +45,7 @@ planets = {
     y = 0,
     r = 100,
     c = 7,
+    mass = 100,
   },
 
   { -- earth
@@ -48,6 +53,7 @@ planets = {
     y = 200,
     r = 40,
     c = 12,
+    mass = 40,
   },
 
   { -- mars
@@ -55,6 +61,7 @@ planets = {
     y = 300,
     r = 30,
     c = 2,
+    mass = 30,
   },
 
   { -- uranus
@@ -62,6 +69,7 @@ planets = {
     y = 500,
     r = 50,
     c = 6,
+    mass = 60,
   },
 
   { -- pluto
@@ -69,8 +77,19 @@ planets = {
     y = 600,
     r = 20,
     c = 15,
+    mass = 20,
   },
 }
+
+function planet_gravity(planet, player_mass, x, y)
+  local dx = planet.x - x
+  local dy = planet.y - y
+  local dx2 = dx*dx
+  local dy2 = dy*dy
+  local magnitude = sqrt(dx2 + dy2)
+  local gravity = (player_mass * planet.mass) / (dx2 + dy2)
+  return dx/magnitude * gravity, dy/magnitude * gravity
+end
 
 function _init()
   _update = update_game
@@ -89,8 +108,8 @@ function update_game()
     local s = sin(player.angle - 0.25) -- this should be positive
     --local c = cos(-(player.angle - 0.5)) -- this should be zero
     --local s = sin(player.angle - 0.5) -- this should be positive
-    player.x += c
-    player.y += s
+    --player.x += c
+    --player.y += s
   end
 
   -- move player backward
@@ -99,8 +118,8 @@ function update_game()
     local s = sin(player.angle + 0.25) -- should be negative
     --local c = cos(player.angle + 0.5) -- should be zero
     --local s = sin(player.angle + 0.5) -- should be negative
-    player.x += c
-    player.y += s
+    --player.x += c
+    --player.y += s
   end
 
   -- move camera
@@ -108,6 +127,21 @@ function update_game()
   if player.x > cam.x+128-20 then cam.x += 1 end
   if player.y < cam.y+20     then cam.y -= 1 end
   if player.y > cam.y+128-20 then cam.y += 1 end
+
+  -- apply force to player velocity
+  -- sum up forces from each planet
+  local gravx, gravy = 0, 0
+  for p in all(planets) do
+    local dx, dy = planet_gravity(p, player.mass, player.x, player.y)
+    gravx += dx
+    gravy += dy
+  end
+  player.vel_x += gravx * (1/30)
+  player.vel_y += gravy * (1/30)
+
+  -- move player
+  player.x += player.vel_x * (1/30)
+  player.y += player.vel_y * (1/30)
 end
 
 function draw_game()
@@ -129,7 +163,7 @@ function draw_game()
 
   -- draw planets
   for p in all(planets) do
-    circfill(p.x, p.y, p.r, 7)
+    circfill(p.x, p.y, p.r, p.c)
   end
 
   -- draw player line
