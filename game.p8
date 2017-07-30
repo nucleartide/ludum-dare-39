@@ -75,6 +75,9 @@ player = {
   y = 0,
   a = 0,
 
+  vel_x = 0,
+  vel_y = 0,
+
   sp = 1,
   sp_w = 4,
   sp_h = 4,
@@ -99,6 +102,9 @@ player = {
     x = 0,
     y = 6,
   },
+
+  propellant = 5,
+  total_propellant = 5,
 }
 
 --
@@ -116,7 +122,7 @@ cam = {
 --
 
 mmap = {
-  margin = 10,
+  margin = 2,
   w = 50,
   border = 1,
 }
@@ -189,38 +195,44 @@ function update_game()
       if btn(1) then player.a += 0.05 end
 
       --
-      -- move player forward
+      -- move player forward (increase velocity)
       --
 
-      if btn(2) then -- up
+      if btnp(2) then -- up
         local c = -round(cos(player.a))
         local s = round(sin(player.a))
-        player.x += c
-        player.y += s
-
-        -- move camera
-        if player.x < cam.x+cam.pad     then cam.x += c end
-        if player.x > cam.x+128-cam.pad then cam.x += c end
-        if player.y < cam.y+cam.pad     then cam.y += s end
-        if player.y > cam.y+128-cam.pad then cam.y += s end
+        player.vel_x += c
+        player.vel_y += s
+        player.propellant -= 1
       end
 
       --
-      -- move player backward
+      -- move player backward (decrease velocity)
       --
 
-      if btn(3) then -- down
+      if btnp(3) then -- down
         local c = round(cos(player.a + 0.25))
         local s = round(sin(player.a + 0.25))
-        player.x += c
-        player.y += s
-
-        -- move camera
-        if player.x < cam.x+cam.pad     then cam.x += c end
-        if player.x > cam.x+128-cam.pad then cam.x += c end
-        if player.y < cam.y+cam.pad     then cam.y += s end
-        if player.y > cam.y+128-cam.pad then cam.y += s end
+        player.vel_x += c
+        player.vel_y += s
+        player.propellant -= 1
       end
+
+      --
+      -- move player
+      --
+
+      player.x += player.vel_x
+      player.y += player.vel_y
+
+      --
+      -- move camera
+      --
+
+      if player.x < cam.x+cam.pad     then cam.x += player.vel_x end
+      if player.x > cam.x+128-cam.pad then cam.x += player.vel_x end
+      if player.y < cam.y+cam.pad     then cam.y += player.vel_y end
+      if player.y > cam.y+128-cam.pad then cam.y += player.vel_y end
 
       --
       -- check if the player escaped the solar system
@@ -289,17 +301,17 @@ function draw_game()
 
     rectfill(
       cam.x + mmap.margin - mmap.border,
-      cam.y + 128 - mmap.margin - mmap.w - mmap.border,
+      cam.y + 127 - mmap.margin - mmap.w - mmap.border,
       cam.x + mmap.margin + mmap.w + mmap.border,
-      cam.y + 128 - mmap.margin + mmap.border,
+      cam.y + 127 - mmap.margin + mmap.border,
       7 -- white
     )
 
     rectfill(
       cam.x + mmap.margin,
-      cam.y + 128 - mmap.margin - mmap.w,
+      cam.y + 127 - mmap.margin - mmap.w,
       cam.x + mmap.margin + mmap.w,
-      cam.y + 128 - mmap.margin,
+      cam.y + 127 - mmap.margin,
       1 -- dark blue
     )
 
@@ -311,7 +323,7 @@ function draw_game()
     for p in all(planets) do
       circfill(
         cam.x + mmap.margin + mmap.w/2       + p.x * scale,
-        cam.y + 128 - mmap.margin - mmap.w/2 + p.y * scale,
+        cam.y + 127 - mmap.margin - mmap.w/2 + p.y * scale,
         p.r * scale,
         p.c
       )
@@ -323,7 +335,7 @@ function draw_game()
 
     circfill(
       cam.x + mmap.margin + mmap.w/2       + player.x * scale,
-      cam.y + 128 - mmap.margin - mmap.w/2 + player.y * scale,
+      cam.y + 127 - mmap.margin - mmap.w/2 + player.y * scale,
       1,
       player.c
     )
@@ -333,13 +345,49 @@ function draw_game()
   -- print debug info
   --
 
-  -- print("player: " .. player.x .. player.y .. ', cam: ' .. cam.x .. cam.y, cam.x, cam.y, 9)
   if player.escaped then
     local t = time()
     local m = flr(t * 2) % 2
     print("escape success", cam.x + 5, cam.y + 5, m + 9)
   else
-    --print("player: " .. 0.01*player.x*0.01*player.y + 0.01*player.y*0.01*player.y, cam.x, cam.y)
+    print("vel: " .. player.vel_x .. ',' .. player.vel_y, cam.x + 2, cam.y + 2, 15)
+  end
+
+  --
+  -- visualize propellant
+  --
+
+  local margin = 2
+  local width = 40
+  local padding = 1
+  local height = 3
+
+  rectfill(
+    cam.x + 127 - margin - 2*padding - width,
+    cam.y + margin,
+    cam.x + 127 - margin,
+    cam.y + margin + 2*padding + height,
+    7
+  )
+
+  local gas = player.propellant - player.total_propellant
+
+  if gas > -player.total_propellant then
+    rectfill(
+      cam.x + 127 - margin - padding - width,
+      cam.y + margin + padding,
+      cam.x + 127 - margin - padding + gas*width/player.total_propellant,
+      cam.y + margin + padding + height,
+      11
+    )
+  else
+    rectfill(
+      cam.x + 127 - margin - padding - width,
+      cam.y + margin + padding,
+      cam.x + 127 - margin - padding - width + 1,
+      cam.y + margin + padding + height,
+      8 
+    )
   end
 end
 
