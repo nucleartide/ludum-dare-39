@@ -13,8 +13,8 @@ __lua__
 starfield = {}
 for i=1,1000 do
   add(starfield, {
-    x = flr(rnd(1001)) - 500, -- [-500, 500]
-    y = flr(rnd(1001)) - 500, -- [-500, 500]
+    x = flr(rnd(1501)) - 750, -- [-750, 750]
+    y = flr(rnd(1501)) - 750, -- [-750, 750]
     c = flr(rnd(3)) + 5,      -- [5, 7]
   })
 end
@@ -183,6 +183,11 @@ function update_game()
 
     if btn(5) then
       player.launched = true
+      player.propellant -= 1
+      local c = -round(cos(player.a))
+      local s = round(sin(player.a))
+      player.vel_x += c
+      player.vel_y += s
     end
   else
     if not player.escaped then
@@ -198,7 +203,7 @@ function update_game()
       -- move player forward (increase velocity)
       --
 
-      if btnp(2) then -- up
+      if player.propellant > 0 and btnp(2) then -- up
         local c = -round(cos(player.a))
         local s = round(sin(player.a))
         player.vel_x += c
@@ -210,7 +215,7 @@ function update_game()
       -- move player backward (decrease velocity)
       --
 
-      if btnp(3) then -- down
+      if player.propellant > 0 and btnp(3) then -- down
         local c = round(cos(player.a + 0.25))
         local s = round(sin(player.a + 0.25))
         player.vel_x += c
@@ -247,10 +252,8 @@ function update_game()
       -- move player forward
       --
 
-      local c = -round(cos(player.a))
-      local s = round(sin(player.a))
-      player.x += c
-      player.y += s
+      player.x += player.vel_x
+      player.y += player.vel_y
     end
   end
 end
