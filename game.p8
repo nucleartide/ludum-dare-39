@@ -87,6 +87,9 @@ player = {
   planet_angle = 0,
   radius_padding = 2,
 
+  -- did the player win the game
+  escaped,
+
   p1 = {
     x = 0,
     y = -1,
@@ -132,8 +135,16 @@ end
 --
 
 function update_game()
-
   if not player.launched then
+
+    --
+    -- move camera
+    --
+
+    if player.x < cam.x+cam.pad     then cam.x -= 2 end
+    if player.x > cam.x+128-cam.pad then cam.x += 2 end
+    if player.y < cam.y+cam.pad     then cam.y -= 2 end
+    if player.y > cam.y+128-cam.pad then cam.y += 2 end
 
     --
     -- position player on planet
@@ -181,10 +192,16 @@ function update_game()
     --
 
     if btn(2) then -- up
-      local c = cos(-(player.a - 0.25))
-      local s = sin(player.a - 0.25)
+      local c = round(cos(-(player.a - 0.25)))
+      local s = round(sin(player.a - 0.25))
       player.x += c
       player.y += s
+
+      -- move camera
+      if player.x < cam.x+cam.pad     then cam.x += c end
+      if player.x > cam.x+128-cam.pad then cam.x += c end
+      if player.y < cam.y+cam.pad     then cam.y += s end
+      if player.y > cam.y+128-cam.pad then cam.y += s end
     end
 
     --
@@ -192,21 +209,34 @@ function update_game()
     --
 
     if btn(3) then -- down
-      local c = cos(player.a + 0.25)
-      local s = sin(player.a + 0.25)
+      local c = round(cos(player.a + 0.25))
+      local s = round(sin(player.a + 0.25))
       player.x += c
       player.y += s
+
+      -- move camera
+      if player.x < cam.x+cam.pad     then cam.x += c end
+      if player.x > cam.x+128-cam.pad then cam.x += c end
+      if player.y < cam.y+cam.pad     then cam.y += s end
+      if player.y > cam.y+128-cam.pad then cam.y += s end
     end
+
+    --
+    -- check if the player escaped the solar system
+    --
+
+    local x
+    local y
+    -- TODO: check if magnitude is > 500
   end
+end
 
-  --
-  -- move camera
-  --
-
-  if player.x < cam.x+cam.pad     then cam.x -= 2 end
-  if player.x > cam.x+128-cam.pad then cam.x += 2 end
-  if player.y < cam.y+cam.pad     then cam.y -= 2 end
-  if player.y > cam.y+128-cam.pad then cam.y += 2 end
+function round(n)
+  local fraction = n % 1
+  if fraction > 0.5 then
+    return flr(n)+1
+  end
+  return flr(n)
 end
 
 function draw_game()
@@ -285,6 +315,12 @@ function draw_game()
   local x, y = rotate(p.x + p.p2.x, p.y + p.p2.y, p.x, p.y, p.a)
   line(p.x, p.y, x, y, p.c)
   circfill(p.x, p.y, p.r, p.c)
+
+  --
+  -- print debug info
+  --
+
+  -- print("player: " .. player.x .. player.y .. ', cam: ' .. cam.x .. cam.y, cam.x, cam.y, 9)
 end
 
 --
