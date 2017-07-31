@@ -296,6 +296,7 @@ function update_game()
 
       if player.x > 600 or player.y > 600 or player.x < -600 or player.y < -600 then
         player.escaped = true
+        score += 10000
       end
 
       --
